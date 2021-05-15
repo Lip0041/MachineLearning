@@ -88,7 +88,6 @@ def exp1_2():
     # print(data)
     draw_model(data, g, cost)
     # print(cost.shape)
-    # print(compute_cost(X, y, g))
 
 
 def draw_linear_model(data, g):
