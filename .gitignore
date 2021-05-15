@@ -3,7 +3,6 @@
 venv/
 .DS_Store
 */.DS_Store
-**/.DS_Store
 code/
 # IntelliJ project files
 .idea
