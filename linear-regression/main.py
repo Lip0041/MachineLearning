@@ -65,6 +65,30 @@ def exp1_1():
     # draw_linear_model(data, normal_theta)
     # print(cost)
     # print(g)
+    draw_3d(X, y)
+
+
+def draw_3d(X, y):
+    J = np.zeros((100, 100))
+    theta0 = np.linspace(-10, 10, 100)
+    theta1 = np.linspace(-1, 4, 100)
+    for i in range(len(theta0)):
+        for j in range(len(theta1)):
+            z = np.matrix((theta0[i], theta1[j]))
+            J[i, j] = compute_cost(X, y, z)
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.plot_surface(theta0, theta1, J, cmap="rainbow")
+    ax.set_xlabel('theta0')
+    ax.set_ylabel('theta1')
+    ax.set_zlabel('J')
+    plt.show()
+    # contour
+    plt.figure()
+    contour = np.logspace(-2, 3, 20)
+    z = plt.contour(theta0, theta1, J, levels=contour)
+    plt.clabel(z)
+    plt.show()
 
 
 def exp1_2():
@@ -131,8 +155,8 @@ def normal_eqn(X, y):
 
 
 def main():
-    # exp1_1()
-    exp1_2()
+    exp1_1()
+    # exp1_2()
 
 
 if __name__ == '__main__':
