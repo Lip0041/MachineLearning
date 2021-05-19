@@ -6,5 +6,4 @@ When I was doing exercise, I referred to this [repository](https://github.com/fe
 
 - [x] ex1: linear regression without code comment
 - [ ] ex2: logistic regression
-
-    
+- [ ] ex3: 
