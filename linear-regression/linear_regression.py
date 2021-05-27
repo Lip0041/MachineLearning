@@ -111,10 +111,10 @@ def exp1_2():
     X, y = process_data(data)
     theta = np.matrix(np.array([0, 0, 0]))
     g, cost = gradient_decent(X, y, theta, alpha=0.01, iteration=1000)
-    draw_model(data, g, cost)
+    draw_model(data, g)
 
 
-def draw_model(data, g, cost):
+def draw_model(data, g):
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     x1 = np.linspace(data.Size.min(), data.Size.max())
