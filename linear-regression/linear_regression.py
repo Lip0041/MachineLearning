@@ -106,9 +106,9 @@ def draw_3d(X, y):
 
 
 def normal_eqn(X, y):
-    # 正规方程求解theta
+    # 正规方程求解 theta = (X^TX)^(-1)X^Ty
     # tip: X@T <--> X.dot(T)
-    theta = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(y)
+    theta = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(y)   # theta is n*1
     return theta.T
 
 
