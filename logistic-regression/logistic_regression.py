@@ -1,11 +1,11 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.optimize as opt    # 使用scipy中的truncated newton(TNC)实现寻找最优参数
 
 
 def draw_data(data, x1, x2, y1, y2):
     # 提取出Admitted为1和0的数据
+    # isin()接受一个列表，判断该列中元素是否在列表中，若在则将该行对应列设置为True
     positive = data[data[y1].isin([1])]
     negative = data[data[y1].isin([0])]
 
@@ -19,58 +19,59 @@ def draw_data(data, x1, x2, y1, y2):
     plt.show()
 
 
+def map_feature(x1, x2):
+    degree = 2
+    out = np.ones((x1.shape[0], 1))
+    for i in np.arange(1, degree + 1):
+        for j in range(i + 1):
+            temp = x1 ** (i - j) * (x2 ** j)
+            out = np.hstack((out, temp.reshape(-1, 1)))
+    return out
+
+
 def ex_data1():
     path = 'ex2data1.txt'
-    data = pd.read_csv(path, header=None, names=['Exam 1', 'Exam 2', 'Admitted'])
-
-    draw_data(data, 'Exam 1', 'Exam 2', 'Admitted', 'Not Admitted')
-
+    data = pd.read_csv(path, header=None, names=['Exam1', 'Exam2', 'Admitted'])
+    draw_data(data, 'Exam1', 'Exam2', 'Admitted', 'Not Admitted')
     data.insert(0, 'Ones', 1)
-    X = data.iloc[:, 0: data.shape[1] - 1]
-    y = data.iloc[:, data.shape[1] - 1: data.shape[1]]
-    X = np.array(X.values)
-    y = np.array(y.values)
-    theta = np.zeros(3)
-    # theta is 0, the cost is:
-    cost(theta, X, y)
+    data.iloc[:, 1: -1] = (data.iloc[:, 1: -1] - data.iloc[:, 1: -1].mean()) / data.iloc[:, 1: -1].std()
+    X = data.iloc[:, 0: -1]
+    y = data.iloc[:, -1:]
+    X = np.matrix(X.values)
+    y = np.matrix(y.values)
+    theta = np.matrix(np.zeros(X.shape[1]))
     # gradient descend
-    gradient(theta, X, y)
-    # 使用TNC寻找最优参数
-    result = opt.fmin_tnc(func=cost, x0=theta, fprime=gradient, args=(X, y))
+    res = gradient(theta, X, y)
+    print(compute_cost(res, X, y))
     # 利用这个最小theta, 计算预测准确率
-    print_prediction(result, X, y)
+    print_prediction(res, X, y)
 
 
 def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
+    return 1.0 / (1.0 + np.exp(-z))
 
 
-def cost(theta, X, y, learningRate=0):
+def compute_cost(theta, X, y):
     theta = np.matrix(theta)
-    X = np.matrix(X)
-    y = np.matrix(y)
-    first = np.multiply(-y, np.log(sigmoid(X * theta.T)))
-    second = np.multiply(1 - y, np.log(1 - sigmoid(X * theta.T)))
-    reg = (learningRate / (2 * len(X))) * np.sum(np.power(theta[:, 1: theta.shape[1], 2]))
-    return np.sum(first - second) / len(X) + reg
+    h = sigmoid(X * theta.T)
+    return np.mean(np.multiply(-y, np.log(h)) - np.multiply((1 - y), np.log(1 - h)))
 
 
-def gradient(theta, X, y, learningRate=0):
-    theta = np.matrix(theta)
-    X = np.matrix(X)
-    y = np.matrix(y)
-    # 获取参数的个数
-    parameters = int(theta.ravel().shape[1])
-    grad = np.zeros(parameters)
+def gradient(theta, X, y, learningRate=1, iteration=100):
+    cost = np.zeros(iteration)
+    for i in range(iteration):
+        error = sigmoid(X * theta.T) - y
+        temp = theta.T - (X.T * error) / len(X) * learningRate
+        theta = temp.T
+        cost[i] = compute_cost(theta, X, y)
 
-    error = sigmoid(X * theta.T) - y
-    for i in range(parameters):
-        term = np.multiply(error, X[:, i])
-        if i == 0:
-            grad[i] = np.sum(term) / len(X)
-        else:
-            grad[i] = (np.sum(term) / len(X) + (learningRate / len(X)) * theta[:, i])
-    return grad
+    fig, ax = plt.subplots(figsize=(9, 6))
+    ax.plot(np.arange(iteration), cost, 'r')
+    ax.set_xlabel('Iterations')
+    ax.set_ylabel('Cost')
+    ax.set_title('Error vs. Training Epoch')
+    plt.show()
+    return theta
 
 
 def predict(theta, X):
@@ -81,7 +82,6 @@ def predict(theta, X):
 def ex_data2():
     path = 'ex2data2.txt'
     data = pd.read_csv(path, header=None, names=['Test 1', 'Test 2', 'Accepted'])
-
     draw_data(data, 'Test 1', 'Test 2', 'Accepted', 'Rejected')
     degree = 5
     x1 = data['Test 1']
@@ -99,13 +99,11 @@ def ex_data2():
     cols = data.shape[1]
     x = np.array(data.iloc[:, 1: cols].values)
     y = np.array(data.iloc[:, 0: 1].values)
-    theta = np.zeros(11)
-    cost(theta, x, y, learningRate=1)
-    gradient(theta, x, y, learningRate=1)
-    # TNC find optimum
-    result = opt.fmin_tnc(func=cost, x0=theta, fprime=gradient, args=(x, y, 1))
+    theta = np.matrix(np.zeros(11))
+    compute_cost(theta, x, y)
+    res = gradient(theta, x, y, learningRate=1, iteration=1000)
     # print prediction
-    print_prediction(result, x, y)
+    print_prediction(res, x, y)
 
 
 def print_prediction(result, x, y):
@@ -117,5 +115,5 @@ def print_prediction(result, x, y):
 
 
 if __name__ == '__main__':
-    # ex_data1()
+    ex_data1()
     ex_data2()
