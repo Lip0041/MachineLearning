@@ -5,9 +5,8 @@ import matplotlib.pyplot as plt
 
 def process_data(data):
     data.insert(0, 'Ones', 1)   # 在第一列之前添加一列1
-    cols = data.shape[1]
-    X = data.iloc[:, 0: cols - 1]
-    y = data.iloc[:, cols - 1: cols]
+    X = data.iloc[:, 0: -1]
+    y = data.iloc[:, -1:]
     # 将X, y转换为矩阵
     X = np.matrix(X.values)
     y = np.matrix(y.values)
@@ -16,23 +15,17 @@ def process_data(data):
 
 def compute_cost(X, y, theta):
     # 计算cost
-    inner = np.power(((X * theta.T) - y), 2)
-    return np.sum(inner) / (2 * len(X))
+    return np.mean(np.power(((X * theta.T) - y), 2)) / 2
 
 
 def gradient_decent(X, y, theta, alpha, iteration):
     # 梯度下降
-    temp = np.matrix(np.zeros(theta.shape))
-    parameters = int(theta.ravel().shape[1])    # ravel()方法，将多维数组转换为一维数组，然后用shape[1]获取列数
     cost = np.zeros(iteration)
     # 每一次迭代，更新theta
     for i in range(iteration):
         error = (X * theta.T) - y
-        for j in range(parameters):
-            term = np.multiply(error, X[:, j])
-            temp[0, j] = theta[0, j] - ((alpha / len(X)) * np.sum(term))
-        # 使用temp确保theta各个量是同时更新的
-        theta = temp
+        temp = theta.T - (X.T * error) / len(X) * alpha
+        theta = temp.T
         cost[i] = compute_cost(X, y, theta)
     # 画出代价函数与迭代次数的关系图
     fig, ax = plt.subplots(figsize=(12, 8))
