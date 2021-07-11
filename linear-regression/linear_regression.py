@@ -3,6 +3,34 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
+def main():
+    ex1()  # 单变量线性回归
+    ex2()  # 多变量线性回归
+
+
+def ex1():
+    path = 'ex1data1.txt'
+    data = pd.read_csv(path, header=None, names=['Population', 'Profit'])
+    X, y = process_data(data)  # 提取其中的数据为matrix形式
+    theta = np.matrix(np.array([0, 0]))  # 初始化 theta
+    g, cost = gradient_decent(X, y, theta, alpha=0.01, iteration=1000)  # 梯度下降
+    draw_model1(data, g)  # 画出线性拟合
+    draw_3d(X, y)  # 绘制theta与J的关系
+    print(normal_eqn(X, y))  # 正规方程求解
+
+
+def ex2():
+    path = 'ex1data2.txt'
+    data = pd.read_csv(path, header=None, names=['Size', 'Bedrooms', 'Price'])
+    data = (data - data.mean()) / data.std()  # 归一化特征，其中 mean()获取平均值，std()获取标准差
+    # 以下同上
+    X, y = process_data(data)
+    theta = np.matrix(np.array([0, 0, 0]))
+    g, cost = gradient_decent(X, y, theta, alpha=0.01, iteration=1000)
+    draw_model2(data, g)
+    print(normal_eqn(X, y))
+
+
 def process_data(data):
     data.insert(0, 'Ones', 1)   # 在第一列之前添加一列1
     X = data.iloc[:, 0: -1]
@@ -103,28 +131,6 @@ def normal_eqn(X, y):
     # tip: X@T <--> X.dot(T)
     theta = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(y)   # theta is n*1
     return theta.T
-
-
-def main():
-    # 单变量线性回归
-    path = 'ex1data1.txt'
-    data = pd.read_csv(path, header=None, names=['Population', 'Profit'])
-    X, y = process_data(data)   # 提取其中的数据为matrix形式
-    theta = np.matrix(np.array([0, 0]))     # 初始化 theta
-    g, cost = gradient_decent(X, y, theta, alpha=0.01, iteration=1000)  # 梯度下降
-    draw_model1(data, g)    # 画出线性拟合
-    draw_3d(X, y)    # 绘制theta与J的关系
-    print(normal_eqn(X, y))    # 正规方程求解
-    # 多变量线性回归
-    path = 'ex1data2.txt'
-    data = pd.read_csv(path, header=None, names=['Size', 'Bedrooms', 'Price'])
-    data = (data - data.mean()) / data.std()    # 归一化特征，其中 mean()获取平均值，std()获取标准差
-    # 以下同上
-    X, y = process_data(data)
-    theta = np.matrix(np.array([0, 0, 0]))
-    g, cost = gradient_decent(X, y, theta, alpha=0.01, iteration=1000)
-    draw_model2(data, g)
-    print(normal_eqn(X, y))
 
 
 if __name__ == '__main__':
