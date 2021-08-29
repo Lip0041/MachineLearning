@@ -9,6 +9,13 @@ def main():
     X, y = load_data('ex3data1.mat')
     # plot_image(X)
     X = np.insert(X, 0, values=np.ones(X.shape[0]), axis=1)
+    # 扩展y
+    y_matrix = []
+    for k in range(1, 11):
+        y_matrix.append((y == k).astype(int))
+    y_matrix = [y_matrix[-1]] + y_matrix[:-1]
+    y = np.matrix(y_matrix)
+
     t = logistic_regression(X, y, lambda0=1)
     print(t.shape)
     y_pred = predict(X, t)
@@ -56,12 +63,12 @@ def predict(x, theta):
 
 def load_data(path, transpose=True):
     data = loadmat(path)
-    y = data.get('y')
+    y = data.get('y')  # (5000, 1)
     y = y.reshape(y.shape[0])
 
-    X = data.get('X')
+    X = data.get('X')  # (5000, 400)
     if transpose:
-        X = np.array([im.reshape((20, 20)).T for im in X])
+        X = np.array([im.reshape((20, 20)).T for im in X])  # 每20*20转置一下
         X = np.array([im.reshape(400) for im in X])
     return X, y
 
@@ -75,7 +82,8 @@ def plot_image(X):
     fig, ax = plt.subplots(nrows=10, ncols=10, sharex=True, sharey=True, figsize=(8,8))
     for r in range(10):
         for c in range(10):
-            ax[r, c].matshow(sample_images[10 * r + c].reshape(size, size), cmap=matplotlib.cm.binary)
+            ax[r, c].matshow(sample_images[10 * r + c].reshape(size, size),
+                             cmap=matplotlib.cm.binary)
             plt.xticks(np.array([]))
             plt.yticks(np.array([]))
     plt.show()
